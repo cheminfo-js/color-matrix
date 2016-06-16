@@ -7,6 +7,21 @@
 
 Create an image with pixel colors based on the values of a matrix
 
+## API
+
+### matrixToColor(matrix, options)
+
+Returns a `Uint8ClampedArray` with the image data.
+
+__Options__
+
+Most options are passed directly to the chroma.js library. See [chroma.js docs](http://gka.github.io/chroma.js/#color-scales)
+
+* mode: color mode used for interpolation (default: `'lab'`)
+* colors: array of color steps. Must contain at least two colors (default: `['white', 'black']`)
+* domain: array of value steps. Must be sorted in ascending order and contain at least two values. You can place the special values `min` and `max` at the extremities to use the min/max value of the matrix (default: `['min', 'max']`)
+* classes: if > 0, only this number of colors will be used (default: `0`)
+
 ## License
 
   [MIT](./LICENSE)

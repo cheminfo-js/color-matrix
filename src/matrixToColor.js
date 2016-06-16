@@ -6,7 +6,8 @@ const minMaxMatrix = require('ml-stat').matrix.minMax;
 const defaultOptions = {
     mode: 'lab',
     colors: ['white', 'black'],
-    domain: ['min', 'max']
+    domain: ['min', 'max'],
+    classes: 0
 };
 
 function matrixToColor(matrix, options) {
