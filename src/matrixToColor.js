@@ -4,8 +4,12 @@ const chroma = require('chroma-js');
 const minMaxArray = require('ml-stat').array.minMax;
 const arrayUtils = require('ml-array-utils');
 
-const MIN_SCALING = 0;
-const MAX_SCALING = 1e6;
+const scaleOptions = {
+    min: 0,
+    max: 1e6,
+    inplace: true
+};
+
 const defaultOptions = {
     mode: 'lab',
     colors: ['white', 'black'],
@@ -33,14 +37,12 @@ function matrixToColor(matrix, options) {
     }
 
     const minMax = minMaxArray(values);
-    arrayUtils.scale(values, {min: MIN_SCALING, max: MAX_SCALING, inplace: true});
+    arrayUtils.scale(values, scaleOptions);
 
     if (domain[0] === 'min') domain[0] = minMax.min;
     if (domain[domainL - 1] === 'max') domain[domainL - 1] = minMax.max;
 
-    for (let i = 0; i < domainL; i++) {
-        domain[i] = (domain[i] - minMax.min) * MAX_SCALING / minMax.max;
-    }
+    arrayUtils.scale(domain, scaleOptions);
 
     let scale;
     if (colorsL < 2 || domainL < 2) {
