@@ -46,6 +46,10 @@ function matrixToColor(matrix, options) {
         throw new Error('cannot interpret color and domain arrays');
     }
 
+    if (options.classes) {
+        scale = scale.classes(options.classes);
+    }
+
     const result = new Uint8ClampedArray(rows * columns * 4);
     var index = 0;
     for (var i = 0; i < rows; i++) {
