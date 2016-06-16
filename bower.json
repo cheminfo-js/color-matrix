@@ -1,0 +1,28 @@
+{
+  "name": "matrix-to-color",
+  "version": "0.0.0",
+  "description": "Create an image with pixel colors based on the values of a matrix",
+  "keywords": [
+    "color",
+    "matrix",
+    "pixel",
+    "image"
+  ],
+  "main": [
+    "dist/matrix-to-color.js"
+  ],
+  "authors": [
+    "Michaël Zasso"
+  ],
+  "homepage": "https://github.com/cheminfo-js/matrix-to-color",
+  "license": "MIT",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "/*",
+    "!dist/*"
+  ]
+}

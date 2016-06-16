@@ -21,7 +21,7 @@
   "main": "./src/matrixToColor.js",
   "scripts": {
     "test": "mocha --require should --reporter mocha-better-spec-reporter --recursive",
-    "build": "cheminfo build"
+    "build": "cheminfo build --no-uglify"
   },
   "devDependencies": {
     "cheminfo-tools": "^1.3.4",
