@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "chroma-js": "^1.1.1",
+    "ml-array-utils": "^0.2.2",
     "ml-stat": "^1.2.0"
   }
 }

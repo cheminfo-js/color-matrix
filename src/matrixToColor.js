@@ -1,8 +1,11 @@
 'use strict';
 
 const chroma = require('chroma-js');
-const minMaxMatrix = require('ml-stat').matrix.minMax;
+const minMaxArray = require('ml-stat').array.minMax;
+const arrayUtils = require('ml-array-utils');
 
+const MIN_SCALING = 0;
+const MAX_SCALING = 1e6;
 const defaultOptions = {
     mode: 'lab',
     colors: ['white', 'black'],
@@ -14,15 +17,30 @@ function matrixToColor(matrix, options) {
     options = Object.assign({}, defaultOptions, options);
     const rows = matrix.length;
     const columns = matrix[0].length;
+    const size = rows * columns;
 
-    let colors = options.colors;
+    let colors = options.colors.slice();
     let colorsL = colors.length;
-    let domain = options.domain;
+    let domain = options.domain.slice();
     let domainL = domain.length;
 
-    const minMax = minMaxMatrix(matrix);
+    const values = new Array(rows * columns);
+    var index = 0;
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < columns; j++) {
+            values[index++] = matrix[i][j];
+        }
+    }
+
+    const minMax = minMaxArray(values);
+    arrayUtils.scale(values, {min: MIN_SCALING, max: MAX_SCALING, inplace: true});
+
     if (domain[0] === 'min') domain[0] = minMax.min;
     if (domain[domainL - 1] === 'max') domain[domainL - 1] = minMax.max;
+
+    for (let i = 0; i < domainL; i++) {
+        domain[i] = (domain[i] - minMax.min) * MAX_SCALING / minMax.max;
+    }
 
     let scale;
     if (colorsL < 2 || domainL < 2) {
@@ -51,16 +69,14 @@ function matrixToColor(matrix, options) {
         scale = scale.classes(options.classes);
     }
 
-    const result = new Uint8ClampedArray(rows * columns * 4);
-    var index = 0;
-    for (var i = 0; i < rows; i++) {
-        for (var j = 0; j < columns; j++) {
-            var color = scale(matrix[i][j]).rgba();
-            result[index++] = color[0];
-            result[index++] = color[1];
-            result[index++] = color[2];
-            result[index++] = color[3] * 255;
-        }
+    const result = new Uint8ClampedArray(size * 4);
+    index = 0;
+    for (var k = 0; k < size; k++) {
+        var color = scale(values[k]).rgba();
+        result[index++] = color[0];
+        result[index++] = color[1];
+        result[index++] = color[2];
+        result[index++] = color[3] * 255;
     }
 
     return result;
