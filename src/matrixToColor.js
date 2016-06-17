@@ -4,6 +4,9 @@ const chroma = require('chroma-js');
 const minMaxArray = require('ml-stat').array.minMax;
 const arrayUtils = require('ml-array-utils');
 
+const HorizontalSVGBuilder = require('./HorizontalSVGBuilder');
+const VerticalSVGBuilder = require('./VerticalSVGBuilder');
+
 const scaleOptions = {
     min: 0,
     max: 1e6,
@@ -79,6 +82,16 @@ function matrixToColor(matrix, options) {
         result[index++] = color[1];
         result[index++] = color[2];
         result[index++] = color[3] * 255;
+    }
+
+    if (options.scale) {
+        const SVGBuilder = options.scale.type === 'vertical' ? VerticalSVGBuilder : HorizontalSVGBuilder;
+        const svgBuilder = new SVGBuilder(options.scale.width, options.scale.height);
+        for (let i = scaleOptions.min; i < scaleOptions.max; i += (scaleOptions.max / 200)) {
+            svgBuilder.addStep(scale(i));
+        }
+        const svg = svgBuilder.getSVG();
+        return {image: result, svg};
     }
 
     return result;
