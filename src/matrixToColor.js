@@ -85,11 +85,16 @@ function matrixToColor(matrix, options) {
     }
 
     if (options.scale) {
-        const SVGBuilder = options.scale.type === 'vertical' ? VerticalSVGBuilder : HorizontalSVGBuilder;
-        const steps = options.scale.steps || 200;
-        const svgBuilder = new SVGBuilder(options.scale.width, options.scale.height, steps);
-        for (let i = scaleOptions.min; i < scaleOptions.max; i += (scaleOptions.max / steps)) {
-            svgBuilder.addStep(scale(i));
+        const SVGBuilder = options.scale.type === 'horizontal' ? HorizontalSVGBuilder : VerticalSVGBuilder;
+        const svgBuilder = new SVGBuilder(options.scale.size);
+        const interval = (scaleOptions.max - scaleOptions.min) / (svgBuilder.getSteps() - 1);
+        for (let i = 0; i < svgBuilder.getSteps(); i++) {
+            svgBuilder.addStep(scale(Math.round(i * interval)));
+        }
+        if (options.scale.labels) {
+            svgBuilder.setLabels(minMax.min, minMax.max, options.scale.labels);
+        } else {
+            svgBuilder.setLabels(minMax.min, minMax.max, [minMax.min, minMax.max]);
         }
         const svg = svgBuilder.getSVG();
         return {image: result, scale: svg};

@@ -2,6 +2,7 @@
 
 class HorizontalSVGBuilder {
     constructor(width, height, steps) {
+        throw new Error('horizontal svg scale not implemented');
         this._steps = steps;
         this._step = 0;
         this._svg = [`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${steps} ${steps / 10}">`];
