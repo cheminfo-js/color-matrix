@@ -86,12 +86,13 @@ function matrixToColor(matrix, options) {
 
     if (options.scale) {
         const SVGBuilder = options.scale.type === 'vertical' ? VerticalSVGBuilder : HorizontalSVGBuilder;
-        const svgBuilder = new SVGBuilder(options.scale.width, options.scale.height);
-        for (let i = scaleOptions.min; i < scaleOptions.max; i += (scaleOptions.max / 200)) {
+        const steps = options.scale.steps || 200;
+        const svgBuilder = new SVGBuilder(options.scale.width, options.scale.height, steps);
+        for (let i = scaleOptions.min; i < scaleOptions.max; i += (scaleOptions.max / steps)) {
             svgBuilder.addStep(scale(i));
         }
         const svg = svgBuilder.getSVG();
-        return {image: result, svg};
+        return {image: result, scale: svg};
     }
 
     return result;

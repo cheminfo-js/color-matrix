@@ -60,4 +60,17 @@ describe('matrix to color', function () {
             255, 255, 255, 255
         ]);
     });
+
+    it('with horizontal scale', function () {
+        var result = matrixToColor([[0, 1], [2, 4]], {
+            mode: 'rgb',
+            colors: ['#000000', '#808080', '#ffffff'],
+            domain: [0, 1, 4],
+            scale: {
+                width: '100px',
+                height: '10px'
+            }
+        });
+        result.should.have.properties(['image', 'scale'])
+    });
 });
