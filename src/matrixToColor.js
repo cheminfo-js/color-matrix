@@ -10,7 +10,7 @@ const VerticalSVGBuilder = require('./VerticalSVGBuilder');
 const scaleOptions = {
     min: 0,
     max: 1e6,
-    inplace: true
+    inPlace: true
 };
 
 const defaultOptions = {
