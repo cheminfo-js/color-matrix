@@ -19,7 +19,9 @@ const times = '×10';
 
 exports.numberToString = function (number) {
     var result;
-    if (Math.abs(number) >= 1) {
+    if (number === 0) {
+        return '0';
+    } else if (Math.abs(number) >= 1) {
         result = number.toPrecision(3);
         result = formatPrecision(result);
     } else if (Math.log10(Math.abs(number)) >= -5) {
@@ -28,7 +30,7 @@ exports.numberToString = function (number) {
         result = number.toExponential(3);
         result = formatPrecision(result);
     }
-    return result.replace(/\.0+(×|$)/, '$1');
+    return result.replace(/\.?0+(×|$)/, '$1');
 };
 
 function formatPrecision(result) {
