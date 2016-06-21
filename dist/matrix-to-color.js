@@ -60,10 +60,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	const minMaxArray = __webpack_require__(3).array.minMax;
 	const arrayUtils = __webpack_require__(6);
 
+	const HorizontalSVGBuilder = __webpack_require__(11);
+	const VerticalSVGBuilder = __webpack_require__(12);
+
 	const scaleOptions = {
 	    min: 0,
 	    max: 1e6,
-	    inplace: true
+	    inPlace: true
 	};
 
 	const defaultOptions = {
@@ -135,6 +138,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        result[index++] = color[1];
 	        result[index++] = color[2];
 	        result[index++] = color[3] * 255;
+	    }
+
+	    if (options.scale) {
+	        const SVGBuilder = options.scale.type === 'horizontal' ? HorizontalSVGBuilder : VerticalSVGBuilder;
+	        const svgBuilder = new SVGBuilder(options.scale.size);
+	        const interval = (scaleOptions.max - scaleOptions.min) / (svgBuilder.getSteps() - 1);
+	        for (let i = 0; i < svgBuilder.getSteps(); i++) {
+	            svgBuilder.addStep(scale(Math.round(i * interval)));
+	        }
+	        if (options.scale.labels) {
+	            svgBuilder.setLabels(minMax.min, minMax.max, options.scale.labels);
+	        } else {
+	            svgBuilder.setLabels(minMax.min, minMax.max, [minMax.min, minMax.max]);
+	        }
+	        const svg = svgBuilder.getSVG();
+	        return {image: result, scale: svg};
 	    }
 
 	    return result;
@@ -3857,7 +3876,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function scale(input, options){
 	    var y;
-	    if(options.inplace){
+	    if(options.inPlace){
 	        y = input;
 	    }
 	    else{
@@ -3891,7 +3910,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    return y;
-
 	}
 
 	module.exports = {
@@ -3938,8 +3956,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function getEquallySpacedData(x, y, options) {
 	    if (x.length>1 && x[0]>x[1]) {
-	        x=x.reverse();
-	        y=y.reverse();
+	        x=x.slice().reverse();
+	        y=y.slice().reverse();
 	    }
 
 	    var xLength = x.length;
@@ -4222,6 +4240,150 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = binarySearch;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	class HorizontalSVGBuilder {
+	    constructor(width, height, steps) {
+	        throw new Error('horizontal svg scale not implemented');
+	        this._steps = steps;
+	        this._step = 0;
+	        this._svg = [`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${steps} ${steps / 10}">`];
+	    }
+
+	    addStep(color) {
+	        if (this._step === this._steps) {
+	            throw new Error('too many steps');
+	        }
+	        this._svg.push(`<rect width="1" height="${this._steps / 10}" x="${this._step++}" fill="${color}" />`);
+	    }
+
+	    getSVG() {
+	        if (this._step < this._steps)
+	            throw new Error(`missing ${this._steps - this._step} steps`);
+	        return this._svg.join('\n') + '</svg>';
+	    }
+	}
+
+	module.exports = HorizontalSVGBuilder;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	const numberToString = __webpack_require__(13).numberToString;
+
+	const WIDTH = 100;
+	const BAR_WIDTH = 20;
+	const FONT_SIZE = 15;
+	const TICK_SIZE = 5;
+
+	const PADDING = Math.ceil(FONT_SIZE / 2);
+
+	class VerticalSVGBuilder {
+	    constructor(size) {
+	        size = size || 200;
+	        this._steps = size - FONT_SIZE;
+	        this._step = 0;
+	        this._svg = [`<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}px" height="${size}px" viewBox="0 0 ${WIDTH} ${size}" >`];
+	    }
+
+	    getSteps() {
+	        return this._steps;
+	    }
+
+	    setLabels(min, max, labels) {
+	        const factor = this._steps / (max - min);
+	        for (const label of labels) {
+	            const y = PADDING + Math.round(factor * (label - min));
+	            this._svg.push(`<line x1="${BAR_WIDTH - TICK_SIZE}" y1="${y}" x2="${BAR_WIDTH}" y2="${y}" stroke="black" stroke-width="1" />`);
+	            this._svg.push(`<text x="${BAR_WIDTH + 2}" y="${y}" fill="black" font-size="${FONT_SIZE}" alignment-baseline="central">${numberToString(label)}</text>`);
+	        }
+	    }
+
+	    addStep(color) {
+	        if (this._step === this._steps) {
+	            throw new Error('too many steps');
+	        }
+	        const y = PADDING + this._step++;
+	        this._svg.push(`<line x1="0" y1="${y}" x2="${BAR_WIDTH}" y2="${y}" stroke="${color}" stroke-width="1" />`);
+	    }
+
+	    getSVG() {
+	        if (this._step < this._steps)
+	            throw new Error(`missing ${this._steps - this._step} steps`);
+	        return this._svg.join('\n') + '\n</svg>';
+	    }
+	}
+
+	module.exports = VerticalSVGBuilder;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	const expNumbers = {
+	    0: '⁰',
+	    1: '¹',
+	    2: '²',
+	    3: '³',
+	    4: '⁴',
+	    5: '⁵',
+	    6: '⁶',
+	    7: '⁷',
+	    8: '⁸',
+	    9: '⁹'
+	};
+
+	const minus = '−';
+	const expMinus = '⁻';
+	const times = '×10';
+
+	exports.numberToString = function (number) {
+	    var result;
+	    if (number === 0) {
+	        return '0';
+	    } else if (Math.abs(number) >= 1) {
+	        result = number.toPrecision(3);
+	        result = formatPrecision(result);
+	    } else if (Math.log10(Math.abs(number)) >= -5) {
+	        result = number.toFixed(5);
+	    } else {
+	        result = number.toExponential(3);
+	        result = formatPrecision(result);
+	    }
+	    return result.replace(/\.?0+(×|$)/, '$1');
+	};
+
+	function formatPrecision(result) {
+	    if (result.charAt(0) ===  '-') {
+	        result = result.replace('-', minus);
+	    }
+	    let eIndex = result.indexOf('e');
+	    if (eIndex > -1) {
+	        result = result.replace('e', times);
+	        let expIndex = eIndex + 3;
+	        if (result.includes('-')) {
+	            result = result.replace('-', expMinus);
+	            expIndex += 1;
+	        }
+	        let exp = result.substring(expIndex);
+	        let newExp = Array.from(exp).map(val => expNumbers[val]).join('');
+	        result = result.slice(0, expIndex) + newExp;
+	    }
+	    return result;
+	}
 
 
 /***/ }
